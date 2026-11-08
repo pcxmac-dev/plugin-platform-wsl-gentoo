@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.2 (2026-11-08)
+
+The install no longer stops at a 404 while getting Liminal-Gentoo's root file system (the user: "gentoo wsl install is
+reporting a 404 error for the installer"). Gentoo's list of the latest stage3 (latest-stage3-amd64-systemd.txt) is PGP
+clear-signed now, and 0.4.1 took its first line that was not a comment, "-----BEGIN PGP SIGNED MESSAGE-----", for the
+tarball's path. The entry is now found by its form (`<build>/stage3-....tar.xz <size>`), in the signed list and in the
+older plain one; the list is kept 5 minutes (`stage3()`: the tarball's url and size). The stage3 is kept only when its
+size is the list's and its SHA-256 the one Gentoo publishes beside it (`<tarball>.sha256`, read before the download:
+without it nothing is downloaded); otherwise it is removed, the install stops saying why, and the next install downloads
+it again. A file that cannot be read (offline, a 404) now ends the install's step in words, where an HTTPError escaped
+the setup bare. The list's PGP signature is not checked: HTTPS to distfiles.gentoo.org and the SHA-256 are the check.
+
 ## 0.4.1 (2026-11-08)
 
 Its icon is Gentoo's g, drawn in the library's line (liminal-libs 1.33.0's `gentoo`; the user: "for the icons, WSL, use the distribution's mascot or icon"). Needs liminal-libs>=1.33.0.
