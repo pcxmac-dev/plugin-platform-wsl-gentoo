@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 (2026-11-08)
+
+Its services (the user: "lets have, in the WSL plugins, a breakdown of the major services running, the 'scanning function' should be capable of using openrc or systemd to look for init type and differentiate between somewhat trivial processes and major services that are online"), on liminal-libs 1.28.0: the platform's page shows what runs in Liminal-Gentoo: the
+init system found (systemd or OpenRC, or SysV scripts), the major services online with what each is and its memory,
+the system's own counted and named in a note; scanned only while the distribution runs, kept 30 s (`services`,
+`services(fresh=True)`). A status, the Docker check or the instance list no longer starts a stopped distribution.
+
 ## 0.3.0 (2026-11-07)
 
 On liminal-libs 1.26.0 (the user: "each plugin should have a scheme for checking the environment to see if it supports

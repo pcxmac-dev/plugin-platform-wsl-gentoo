@@ -51,3 +51,13 @@ distribution's own download servers, when `setup` installs.
 criterion and unlocks the install only when every one is met; the install's output shows in a terminal panel as it
 runs. Once installed, `update_packages` brings its packages up to date (emerge --sync and an update of @world) and `terminal` opens a login shell
 into it on the page.
+
+## Its services
+
+The user's words (2026-11-08): "lets have, in the WSL plugins, a breakdown of the major services running, the 'scanning function' should be capable of using openrc or systemd to look for init type and differentiate between somewhat trivial processes and major services that are online". `services` scans what runs in Liminal-Gentoo, as root, with one script (liminal-libs'
+`machines.services`): which init system runs (systemd or OpenRC, or SysV scripts through the service command) and what
+PID 1 is; every service it knows with its state; the processes. The major services (Docker, databases, web, mail and
+DNS servers, SSH, VPNs, the firewall, Liminal's own apps) are listed with what each is and its memory; a service not
+known here is listed with its own description; the system's own (logging, time, devices, D-Bus, logins, package
+daemons, the WSL bridge) are counted and named in a note, with any that failed. The platform's page shows the table;
+the scan runs only while the distribution runs and is kept 30 s: a status never starts a stopped distribution.
