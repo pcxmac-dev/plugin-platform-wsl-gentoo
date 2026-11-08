@@ -28,7 +28,7 @@ class FakeWsl:
         if args[1:3] == ["--list", "--online"]:
             return 0, u16("NAME FRIENDLY\r\n" + "".join(f"{n} x\r\n" for n in self.online)), b""
         if args[1] == "-d":
-            command = args[args.index("--") + 1:]
+            command = args[args.index("--exec") + 1:]
             if command[:2] == ["docker", "--version"]:
                 return (0, b"Docker version 28.1.1, build x\n", b"") if self.docker else (127, b"", b"not found")
             if command[:2] == ["docker", "info"]:
@@ -46,7 +46,7 @@ def test_the_plugin_names_its_distribution_and_offers_its_engine(monkeypatch):
     p = WslGentooPlugin(wsl=Wsl(runner=fake))
     assert p.present() and p.status()["engine"]["installed"] and p.status()["family"] == "emerge"
     (inst,) = p.instances()
-    assert inst.name == "wsl-gentoo" and inst.command == f"wsl -d {p.distribution_name} docker" and inst.translate("C:\\\\x") == "/mnt/c/x"
+    assert inst.name == "wsl-gentoo" and inst.command == f"wsl -d {p.distribution_name} --exec docker" and inst.translate("C:\\\\x") == "/mnt/c/x"
     assert p.run("echo", "hi") == "echo hi\n"
     assert WslGentooPlugin(wsl=Wsl(runner=FakeWsl())).instances() == ()
 
