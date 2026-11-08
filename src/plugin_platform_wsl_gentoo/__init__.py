@@ -14,7 +14,7 @@ import os
 
 from liminal_libs.machines.wsl import WslDistribution, WslError
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 
 def _read_text(url: str) -> str:
@@ -26,6 +26,7 @@ def _read_text(url: str) -> str:
 
 class WslGentooPlugin(WslDistribution):
     name = "wsl-gentoo"
+    ICON = "gentoo"  # Gentoo's g (liminal-libs 1.33.0's icons.js)
     title = "WSL Gentoo"
     about = "Gentoo in WSL 2 on this Windows PC, with Docker inside: the Linux the platform's containers run in"
     api = "2.1"

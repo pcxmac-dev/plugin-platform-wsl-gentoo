@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 (2026-11-08)
+
+Its icon is Gentoo's g, drawn in the library's line (liminal-libs 1.33.0's `gentoo`; the user: "for the icons, WSL, use the distribution's mascot or icon"). Needs liminal-libs>=1.33.0.
+
 ## 0.4.0 (2026-11-08)
 
 Its services (the user: "lets have, in the WSL plugins, a breakdown of the major services running, the 'scanning function' should be capable of using openrc or systemd to look for init type and differentiate between somewhat trivial processes and major services that are online"), on liminal-libs 1.28.0: the platform's page shows what runs in Liminal-Gentoo: the
