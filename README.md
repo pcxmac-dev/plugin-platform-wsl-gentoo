@@ -19,7 +19,7 @@ A machine plugin of the platform (`liminal_libs.machines.MachinePlugin`, plugin 
   its version, the daemon answering).
 - `setup()`: everything, step by step, each reported: WSL itself (`wsl --install --no-distribution`; Windows
   asks to confirm with elevation and may want a restart), `wsl --update`, WSL 2 as the default, the
-  distribution (imported with `wsl --import Gentoo` from the latest amd64 systemd stage3 tarball of Gentoo's own mirrors (downloaded into the data folder's platform/wsl/wsl-gentoo); Docker by emerge (app-containers/docker, docker-cli, docker-buildx, docker-compose), which compiles and takes a while.), `/etc/wsl.conf` with systemd on and the default user `liminal`
+  distribution (imported with `wsl --import Liminal-Gentoo` from the latest amd64 systemd stage3 tarball of Gentoo's own mirrors (downloaded into the data folder's platform/wsl/wsl-gentoo); Docker by emerge (app-containers/docker, docker-cli, docker-buildx, docker-compose), which compiles and takes a while.), `/etc/wsl.conf` with systemd on and the default user `liminal`
   (WSL_GENTOO_USER) made when absent, Docker installed, the engine started and enabled (systemd, else
   OpenRC, else `service`), the user in the docker group. Everything inside runs as root through `wsl -u
   root`, so no password is asked. A step can be run alone: `setup docker`.
@@ -28,7 +28,10 @@ A machine plugin of the platform (`liminal_libs.machines.MachinePlugin`, plugin 
   Windows paths under `/mnt`; a login file's `[server] instance = wsl-gentoo` runs its mail server there, and
   `liminal_libs.docker.instance("wsl-gentoo")` gives any app the engine.
 
-Variables: `WSL_GENTOO_DISTRIBUTION` (the WSL name, `Gentoo` unless said), `WSL_GENTOO_USER`.
+Variables: `WSL_GENTOO_DISTRIBUTION` (the WSL name, `Liminal-Gentoo` unless said), `WSL_GENTOO_USER`.
+
+Its distribution is Liminal's own, installed beside the user's distributions and never taking one of them: the plugin
+is valid only with it installed, and the platform disables it until then.
 
 ## From the command line
 

@@ -14,7 +14,7 @@ import os
 
 from liminal_libs.machines.wsl import WslDistribution, WslError
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 
 def _read_text(url: str) -> str:
@@ -30,7 +30,7 @@ class WslGentooPlugin(WslDistribution):
     about = "Gentoo in WSL 2 on this Windows PC, with Docker inside: the Linux the platform's containers run in"
     api = "2.1"
     order = 702
-    distribution = "Gentoo"
+    distribution = "Liminal-Gentoo"  # Liminal's own, imported from Gentoo's stage3 (never a Gentoo of the user's)
     family = "emerge"
     install_name = ""
     DISTRIBUTION_VAR = "WSL_GENTOO_DISTRIBUTION"

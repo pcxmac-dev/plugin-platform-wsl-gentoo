@@ -42,13 +42,15 @@ def test_the_plugin_names_its_distribution_and_offers_its_engine(monkeypatch):
     monkeypatch.delenv("WSL_GENTOO_USER", raising=False)
     assert MACHINE.name == "wsl-gentoo" and MACHINE.family == "emerge" and MACHINE.SYSTEM == "platform" and MACHINE.KIND == "machine"
     assert MACHINE.options == ("WSL_GENTOO_DISTRIBUTION", "WSL_GENTOO_USER") and MACHINE.user == "liminal"
-    fake = FakeWsl(distributions=[("Gentoo", "Running", "2")], docker=True)
+    fake = FakeWsl(distributions=[("Liminal-Gentoo", "Running", "2")], docker=True)
     p = WslGentooPlugin(wsl=Wsl(runner=fake))
     assert p.present() and p.status()["engine"]["installed"] and p.status()["family"] == "emerge"
     (inst,) = p.instances()
     assert inst.name == "wsl-gentoo" and inst.command == f"wsl -d {p.distribution_name} --exec docker" and inst.translate("C:\\\\x") == "/mnt/c/x"
     assert p.run("echo", "hi") == "echo hi\n"
     assert WslGentooPlugin(wsl=Wsl(runner=FakeWsl())).instances() == ()
+    assert MACHINE.distribution == "Liminal-Gentoo" and p.status()["valid"] is True
+    assert WslGentooPlugin(wsl=Wsl(runner=FakeWsl(distributions=[("Gentoo", "Running", "2")]))).status()["valid"] is False
 
 
 def test_gentoos_tarball_is_the_latest_stage3_from_its_own_list():
