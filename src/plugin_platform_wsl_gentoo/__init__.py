@@ -14,7 +14,7 @@ import os
 
 from liminal_libs.machines.wsl import WslDistribution, WslError
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 
 def _read_text(url: str) -> str:
@@ -32,6 +32,8 @@ class WslGentooPlugin(WslDistribution):
     order = 702
     distribution = "Liminal-Gentoo"  # Liminal's own, imported from Gentoo's stage3 (never a Gentoo of the user's)
     family = "emerge"
+    space_gb = 20.0  # emerge compiles Docker: room for the sources and the builds
+    architectures = ("AMD64", "x86_64")  # the amd64 stage3 it imports
     install_name = ""
     DISTRIBUTION_VAR = "WSL_GENTOO_DISTRIBUTION"
     USER_VAR = "WSL_GENTOO_USER"

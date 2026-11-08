@@ -60,3 +60,9 @@ def test_gentoos_tarball_is_the_latest_stage3_from_its_own_list():
     assert p.install_name == "" and p.family == "emerge"
     with pytest.raises(WslError):
         WslGentooPlugin(wsl=Wsl(runner=FakeWsl()), read=lambda url: "# nothing\n").tarball_url()
+
+
+def test_it_checks_this_pc_updates_its_packages_and_opens_a_terminal():
+    """liminal-libs 1.26.0: the check before the install, the packages' update, the login terminal."""
+    assert {"check", "update_packages", "terminal"} <= set(MACHINE.interface()["hooks"])
+    assert MACHINE.space_gb == 20.0 and MACHINE.architectures == ("AMD64", "x86_64")

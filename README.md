@@ -44,3 +44,10 @@ python -m plugin_platform_wsl_gentoo instances
 
 The platform app drives the same hooks from its page. Nothing here is sent anywhere but Docker's and the
 distribution's own download servers, when `setup` installs.
+
+## Its check, its install, its updates, its terminal
+
+`check` says whether this PC can install Liminal-Gentoo: Windows that runs WSL 2, WSL installed with its kernel, Gentoo's stage3 found on its mirrors, a processor it is built for (x86-64), 20 GB free on the data folder's drive. The platform's page shows each
+criterion and unlocks the install only when every one is met; the install's output shows in a terminal panel as it
+runs. Once installed, `update_packages` brings its packages up to date (emerge --sync and an update of @world) and `terminal` opens a login shell
+into it on the page.
