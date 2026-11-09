@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0 (2026-11-08)
+
+Every Gentoo install listed, and a selector for them (the user: "for the WSL plugins, they need to list all the
+'operating systems' that are installed under the plugin's regime, like ubuntu shows all ubuntu installs, fedora --
+installs, gentoo -- installs"; "also the ability to uninstall and select which one to terminal in to"; "basically a
+selector for different installs"), all of it liminal-libs 1.36.0's: the page's "Gentoo installs" table lists every
+Gentoo distribution installed for this Windows user from WSL's own record (WSL records its flavor (gentoo), or a name starting Gentoo; Liminal-Gentoo, imported from Gentoo's stage3, by its own name), its state, version, WSL, disk and
+whose, none started to look. The one chosen (Liminal-Gentoo unless another is picked) is the one a terminal opens into,
+as its default user, and the one Uninstall unregisters (`wsl --unregister`: its disk deleted for good), one of yours only
+after a second confirmation. Needs liminal-libs>=1.36.0.
+
 ## 0.4.3 (2026-11-08)
 
 The install no longer stops in its docker step with names that cannot be looked up (the user: "gentoo WSL error -
