@@ -202,3 +202,155 @@ def test_it_checks_this_pc_updates_its_packages_and_opens_a_terminal():
     """liminal-libs 1.26.0: the check before the install, the packages' update, the login terminal."""
     assert {"check", "update_packages", "terminal"} <= set(MACHINE.interface()["hooks"])
     assert MACHINE.space_gb == 20.0 and MACHINE.architectures == ("AMD64", "x86_64")
+
+
+# -- 0.4.3: its boot under systemd set right, and a lookup checked before anything is downloaded inside ---------------
+# What Liminal-Gentoo's two scripts print, as the stand-in answers them: the systemd step's, a lookup that works through
+# WSL's /etc/resolv.conf, and a first boot's state (the stage3 ships no /etc/machine-id: systemd turned on its presets,
+# systemd-resolved among them, and /etc/nsswitch.conf asks it first).
+SYSTEMD_SAID = "machine-id: made\nmasked: systemd-resolved systemd-networkd\nhosts: files myhostname dns\nliminal-systemd: ready\n"
+FOUND = ("lookup: ok 151.101.2.132\nresolv: link /mnt/wsl/resolv.conf\nnameserver: 10.255.255.254\n"
+         "hosts: files myhostname dns\nsystemd: running\n")
+FIRST_BOOT = ("lookup: failed\nresolv: link /mnt/wsl/resolv.conf\nnameserver: 10.255.255.254\n"
+              "hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns\nsystemd: starting\nresolved: listening\n")
+
+
+@pytest.fixture(autouse=True)
+def _its_own_names(monkeypatch):
+    monkeypatch.delenv("WSL_GENTOO_DISTRIBUTION", raising=False)
+    monkeypatch.delenv("WSL_GENTOO_USER", raising=False)
+
+
+class GentooWsl(FakeWsl):
+    """The stand-in wsl, with Liminal-Gentoo's answers to the plugin's two scripts (told apart by their argument)."""
+
+    def __init__(self, dns=FOUND, systemd=SYSTEMD_SAID, **kw):
+        super().__init__(**kw)
+        self.dns, self.systemd = dns, systemd
+
+    def __call__(self, args, timeout):
+        said = {"liminal-dns": self.dns, "liminal-systemd": self.systemd}.get(args[-1]) if args[1] == "-d" else None
+        if said is not None:
+            self.calls.append(list(args))
+            return 0, said.encode(), b""
+        return super().__call__(args, timeout)
+
+
+INSTALLED = [("Liminal-Gentoo", "Running", "2")]
+ROOT = ["wsl", "-d", "Liminal-Gentoo", "-u", "root", "--exec"]
+
+
+def test_its_steps_set_systemd_right_before_the_restart_into_it_and_look_up_a_name_after():
+    assert MACHINE.STEPS == ("wsl", "update", "version", "distribution", "systemd", "conf", "dns", "docker", "engine", "user")
+
+
+def test_setting_up_again_finishes_a_half_installed_gentoo_without_downloading_it_again(tmp_path):
+    """The 2026-11-08 install stopped in its docker step: every lookup inside waited until wget gave up ("wget: unable
+    to resolve host address 'distfiles.gentoo.org'"), for two hours. Run again (the platform's Set up, Everything), the
+    distribution step finds Liminal-Gentoo installed and nothing is downloaded: the systemd step sets its boot right
+    and restarts it, the conf step restarts it into systemd, the lookup is checked, then Docker is installed."""
+    fake, g = GentooWsl(distributions=INSTALLED), Gentoo()
+    p = WslGentooPlugin(wsl=Wsl(runner=fake), data=tmp_path, fetch=g.fetch, read=g.read)
+    done = p.setup(log=lambda m: None)
+    assert [d["step"] for d in done] == list(plugin.STEPS) and all(d["ok"] is not False for d in done), done
+    assert done[3] == {"step": "distribution", "ok": None, "detail": "Liminal-Gentoo is installed"}
+    assert g.reads == [] and g.fetched == []  # neither Gentoo's list nor its 268 MB stage3
+
+    def at(command, after=-1):
+        return next(i for i, c in enumerate(fake.calls) if i > after and c == command)
+
+    s = at(ROOT + ["sh", "-s", "liminal-systemd"])
+    t = at(["wsl", "--terminate", "Liminal-Gentoo"], s)  # restarted with its machine ID: no boot is systemd's first
+    c = at(ROOT + ["sh", "-c", "cat > /etc/wsl.conf"], t)
+    d = at(ROOT + ["sh", "-s", "liminal-dns"], c)
+    assert at(ROOT + ["sh", "-s"], d) > d  # Docker's emerge only after the lookup
+    assert done[4]["detail"].startswith("Liminal-Gentoo boots as WSL needs: its machine ID made, so no boot is systemd's first")
+    assert "systemd-resolved and systemd-networkd masked" in done[4]["detail"] and done[4]["detail"].endswith("Liminal-Gentoo restarted")
+    assert done[6]["detail"] == ("Liminal-Gentoo looks up distfiles.gentoo.org (151.101.2.132) through /etc/resolv.conf "
+                                 "(WSL's, a link to /mnt/wsl/resolv.conf; nameserver 10.255.255.254)")
+
+
+def test_a_lookup_that_fails_ends_the_install_before_anything_is_downloaded_inside_and_says_why():
+    fake = GentooWsl(dns=FIRST_BOOT, distributions=INSTALLED)
+    p = WslGentooPlugin(wsl=Wsl(runner=fake))
+    (done,) = p.setup(log=lambda m: None, steps=["dns", "docker", "engine"])
+    assert done["step"] == "dns" and done["ok"] is False
+    assert done["detail"] == (
+        "Liminal-Gentoo cannot look up distfiles.gentoo.org, so nothing is downloaded inside it: its lookups go to "
+        "systemd-resolved first (/etc/nsswitch.conf: hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns), "
+        "and it does not answer; systemd has not finished booting (starting). Its systemd step sets Liminal-Gentoo "
+        "right: run the setup again (an installed Liminal-Gentoo is not downloaded again).")
+    assert ROOT + ["sh", "-s"] not in fake.calls  # no emerge, no engine
+
+
+@pytest.mark.parametrize("facts, words, ours", [
+    pytest.param("lookup: failed\nresolv: dangling ../run/systemd/resolve/stub-resolv.conf\nhosts: files myhostname dns\n"
+                 "systemd: running\n", "its /etc/resolv.conf is a link to ../run/systemd/resolve/stub-resolv.conf, "
+                 "which does not exist", True, id="resolved-stub-link"),
+    pytest.param("lookup: failed\nresolv: missing\nhosts: files myhostname dns\nsystemd: running\ngenerate: off\n",
+                 "it has no /etc/resolv.conf: its /etc/wsl.conf turns WSL's off (generateResolvConf = false)", False,
+                 id="wsl-conf-turns-it-off"),
+    pytest.param("lookup: failed\nresolv: file\nhosts: files myhostname dns\nsystemd: degraded\n",
+                 "its /etc/resolv.conf names no DNS server", False, id="no-server"),
+    pytest.param("lookup: failed\nresolv: link /mnt/wsl/resolv.conf\nnameserver: 10.255.255.254\nhosts: files myhostname dns\n"
+                 "systemd: running\n", "the DNS server WSL gives it (10.255.255.254) does not answer: Windows' own "
+                 "network, a VPN, or WSL's DNS (dnsTunneling in .wslconfig) is where to look", False, id="server-silent"),
+    pytest.param("lookup: failed\nresolv: link /mnt/wsl/resolv.conf\nnameserver: 10.255.255.254\nhosts: files myhostname dns\n"
+                 "systemd:\n", "systemd has not finished booting (it does not say how far it has got)", True,
+                 id="boot-unfinished"),
+])
+def test_a_lookup_that_fails_is_said_plainly(facts, words, ours):
+    p = WslGentooPlugin(wsl=Wsl(runner=GentooWsl(dns=facts, distributions=INSTALLED)))
+    with pytest.raises(WslError) as e:
+        p.lookup()
+    said = str(e.value)
+    assert said.startswith("Liminal-Gentoo cannot look up distfiles.gentoo.org") and words in said
+    assert ("Its systemd step sets Liminal-Gentoo right" in said) is ours
+
+
+def test_the_systemd_step_keeps_a_first_boots_machine_id_and_removes_a_stale_resolv_conf():
+    systemd = ("machine-id: committed\nmasked: systemd-resolved systemd-networkd\nresolv: removed "
+               "../run/systemd/resolve/stub-resolv.conf\nhosts: files myhostname dns\nliminal-systemd: ready\n")
+    fake = GentooWsl(systemd=systemd, distributions=INSTALLED)
+    (done,) = WslGentooPlugin(wsl=Wsl(runner=fake)).setup(log=lambda m: None, steps=["systemd"])
+    assert done["ok"] is True and "its machine ID kept from its first boot" in done["detail"]
+    assert "a stale /etc/resolv.conf removed (a link to ../run/systemd/resolve/stub-resolv.conf)" in done["detail"]
+    assert fake.calls[-2:] == [ROOT + ["sh", "-s", "liminal-systemd"], ["wsl", "--terminate", "Liminal-Gentoo"]]
+
+
+def test_its_own_steps_change_nothing_in_a_distribution_not_liminals_nor_in_one_not_there(monkeypatch):
+    (done,) = WslGentooPlugin(wsl=Wsl(runner=GentooWsl())).setup(log=lambda m: None, steps=["dns"])
+    assert done == {"step": "dns", "ok": False, "detail": "Liminal-Gentoo is not installed: its distribution step installs it"}
+    monkeypatch.setenv("WSL_GENTOO_DISTRIBUTION", "Gentoo")
+    fake = GentooWsl(distributions=[("Gentoo", "Running", "2")])
+    (done,) = WslGentooPlugin(wsl=Wsl(runner=fake)).setup(log=lambda m: None, steps=["systemd"])
+    assert done["ok"] is False and done["detail"].startswith("Gentoo is not one of Liminal's own distributions (Liminal-...)")
+    assert fake.calls == []  # not even asked what is installed
+
+
+def test_the_scripts_set_the_boot_right_by_files_alone_and_look_up_with_a_time_limit():
+    s = plugin.SYSTEMD_SCRIPT
+    assert s.startswith("set -e\n") and "systemctl" not in s  # asks systemd nothing: works whether it runs or not
+    assert "systemd-machine-id-setup --commit" in s and "tr -d '-' < /proc/sys/kernel/random/uuid > /etc/machine-id" in s
+    for unit in ("systemd-resolved.service", "systemd-resolved-varlink.socket", "systemd-resolved-monitor.socket",
+                 "systemd-networkd.service"):
+        assert unit in s.split('ln -sfn /dev/null "$unit"')[0].rsplit("for unit in", 1)[1]  # masked
+    assert "ln -sfn /dev/null /etc/tmpfiles.d/systemd-resolve.conf" in s and "hosts:      files myhostname dns" in s
+    d = plugin.DNS_SCRIPT
+    assert d.startswith("host=distfiles.gentoo.org\n") and "timeout 15 getent ahosts" in d and d.rstrip().endswith("exit 0")
+    assert plugin._facts("lookup: ok 1.2.3.4\nnameserver: 10.0.0.1\nnameserver: fe80::1%eth0\nhosts:\nnoise\n") == {
+        "lookup": "ok 1.2.3.4", "nameserver": ["10.0.0.1", "fe80::1%eth0"], "hosts": ""}
+
+
+def test_the_docker_install_and_the_packages_update_look_up_first():
+    guard, _, recipe = MACHINE.install_script().partition("fi\n")
+    assert guard.startswith("if ! timeout 30 getent ahosts distfiles.gentoo.org >/dev/null 2>&1; then\n") and "exit 3" in guard
+    assert recipe.startswith("set -e\nemerge --sync --quiet || emerge-webrsync\n") and "app-containers/docker " in recipe
+    fake = GentooWsl(dns=FIRST_BOOT, distributions=INSTALLED)
+    p = WslGentooPlugin(wsl=Wsl(runner=fake))
+    (done,) = p.update_packages(log=lambda m: None)
+    assert done["step"] == "packages" and done["ok"] is False and "cannot look up distfiles.gentoo.org" in done["detail"]
+    assert ROOT + ["sh", "-s"] not in fake.calls
+    fake.dns = FOUND
+    (done,) = p.update_packages(log=lambda m: None)
+    assert done["ok"] is True and ROOT + ["sh", "-s"] in fake.calls

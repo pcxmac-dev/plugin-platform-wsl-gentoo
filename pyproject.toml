@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "plugin-platform-wsl-gentoo"
-version = "0.4.2"  # the plugin's own release (CHANGELOG.md); the app shows it on the Plugins view
+version = "0.4.3"  # the plugin's own release (CHANGELOG.md); the app shows it on the Plugins view
 description = "WSL Gentoo for Liminal: Gentoo in WSL 2 set up by the platform, with Docker inside, as a Docker instance for the framework."
 readme = "README.md"
 requires-python = ">=3.10"

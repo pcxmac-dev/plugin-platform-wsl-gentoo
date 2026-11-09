@@ -19,10 +19,15 @@ A machine plugin of the platform (`liminal_libs.machines.MachinePlugin`, plugin 
   its version, the daemon answering).
 - `setup()`: everything, step by step, each reported: WSL itself (`wsl --install --no-distribution`; Windows
   asks to confirm with elevation and may want a restart), `wsl --update`, WSL 2 as the default, the
-  distribution (imported with `wsl --import Liminal-Gentoo` from the latest amd64 systemd stage3 tarball of Gentoo's own mirrors (downloaded into the data folder's platform/wsl/wsl-gentoo); Docker by emerge (app-containers/docker, docker-cli, docker-buildx, docker-compose), which compiles and takes a while.), `/etc/wsl.conf` with systemd on and the default user `liminal`
-  (WSL_GENTOO_USER) made when absent, Docker installed, the engine started and enabled (systemd, else
+  distribution (imported with `wsl --import Liminal-Gentoo` from the latest amd64 systemd stage3 tarball of Gentoo's own mirrors (downloaded into the data folder's platform/wsl/wsl-gentoo); Docker by emerge (app-containers/docker, docker-cli, docker-buildx, docker-compose), which compiles and takes a while.), its boot under
+  systemd set right for WSL (`systemd`: a machine ID, so no boot is systemd's first, which would turn on every preset and
+  run its first-boot wizard; systemd-resolved and systemd-networkd masked, since WSL gives the network and the DNS server;
+  names looked up in /etc/hosts, then WSL's own /etc/resolv.conf), `/etc/wsl.conf` with systemd on and the default user `liminal`
+  (WSL_GENTOO_USER) made when absent, a lookup of distfiles.gentoo.org checked before anything is downloaded inside
+  (`dns`: when it fails, what is wrong is said in words), Docker installed, the engine started and enabled (systemd, else
   OpenRC, else `service`), the user in the docker group. Everything inside runs as root through `wsl -u
-  root`, so no password is asked. A step can be run alone: `setup docker`.
+  root`, so no password is asked. A step can be run alone: `setup docker`. Run again on an installed Liminal-Gentoo, the
+  setup finishes it from where it stopped: the distribution step finds it installed and nothing is downloaded again.
 - `run(command)`: a command in the distribution.
 - `instances()`: the engine as the Docker instance `wsl-gentoo`, reached as `wsl -d Gentoo docker`,
   Windows paths under `/mnt`; a login file's `[server] instance = wsl-gentoo` runs its mail server there, and

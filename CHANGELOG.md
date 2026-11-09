@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.4.3 (2026-11-08)
+
+The install no longer stops in its docker step with names that cannot be looked up (the user: "gentoo WSL error -
+wget: unable to resolve host address 'distfiles.gentoo.org'"). Before, `emerge --sync` could not look up
+rsync.gentoo.org, and emerge-webrsync went back a day at a time. Each wget waited its minute (`-T 60`) until the step's
+two hours ran out.
+
+The cause: Gentoo's stage3 ships no /etc/machine-id, so the first boot under systemd (the restart after the conf step)
+was systemd's "first boot". On that boot, systemd 261 turns on every unit its presets name. That includes
+systemd-resolved, whose socket listens from the start of the boot, along with systemd-networkd and others. It also runs
+its first-boot wizard. WSL said it could not start root's user session. Gentoo's /etc/nsswitch.conf sends a lookup to
+systemd-resolved before /etc/resolv.conf (`hosts: mymachines resolve [!UNAVAIL=return] files myhostname dns`), so each
+lookup waited on it, and WSL's own /etc/resolv.conf was never read. That file is a link to /mnt/wsl/resolv.conf, written
+at every start; the stage3 ships none, and systemd's rule for one only fills a gap.
+
+Two steps of Gentoo's own now sit around the library's conf step:
+
+- `systemd` runs before the restart into systemd. It uses file operations only, as root, so it works whether systemd
+  runs or not:
+  - a machine ID is made, or the one a first boot made is kept on disk;
+  - systemd-resolved and systemd-networkd are masked, with their enablement removed (WSL gives the network and the DNS
+    server);
+  - systemd's rule linking /etc/resolv.conf to resolved's stub is turned off;
+  - a stale link in /etc/resolv.conf is removed;
+  - names are looked up in /etc/hosts, then /etc/resolv.conf (`hosts: files myhostname dns`, with the old line kept as
+    a comment).
+  The distribution is then restarted.
+- `dns` looks up distfiles.gentoo.org inside before anything is downloaded there (twice, 15 s each). When the lookup
+  fails, the step says plainly what is wrong: what /etc/resolv.conf is, the DNS server it names, where nsswitch.conf
+  sends a lookup, and whether systemd has finished booting.
+
+The docker step's emerge recipe and the packages' update also look up the name first, and stop at once in words when
+they cannot. Running the setup again on a half-installed Liminal-Gentoo (the platform's Set up, Everything) finishes it
+from where it stopped. The distribution step finds it installed, so the stage3 is not downloaded again.
+
 ## 0.4.2 (2026-11-08)
 
 The install no longer stops at a 404 while getting Liminal-Gentoo's root file system (the user: "gentoo wsl install is
