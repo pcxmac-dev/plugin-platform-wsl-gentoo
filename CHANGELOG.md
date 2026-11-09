@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.0 (2026-11-09)
+
+Rename… among an install's tasks, liminal-libs 1.38.0's (the user: "lets allow renaming the o/s on all three plugins"):
+any Gentoo install renamed in WSL's own record (WSL has no command for it), stopped first when it runs;
+Liminal-Gentoo keeps Liminal- in front and the plugin follows it through the login (WSL_GENTOO_DISTRIBUTION).
+Needs liminal-libs>=1.38.0.
+
 ## 0.6.0 (2026-11-09)
 
 The installs' tasks, liminal-libs 1.37.0's (the user: "instead of chosen, put task and for the tasks lets do terminal,

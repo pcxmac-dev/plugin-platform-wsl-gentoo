@@ -21,7 +21,7 @@ from time import monotonic
 from liminal_libs.machines.plugin import LIMINAL_PREFIX, liminal_scoped
 from liminal_libs.machines.wsl import WslDistribution, WslError
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 # The setup's steps: the library's, with two of Gentoo's own around its conf step (the restart into systemd). Why (the
 # user, 2026-11-08: "gentoo WSL error - wget: unable to resolve host address 'distfiles.gentoo.org'"): the stage3 ships
