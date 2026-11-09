@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (2026-11-09)
+
+The installs' tasks, liminal-libs 1.37.0's (the user: "instead of chosen, put task and for the tasks lets do terminal,
+start, pause, stop, allow selection of the linux install by clicking on the list"; "tasks also include uninstall"): a
+Gentoo install is chosen by a click on its row in the "Gentoo installs" table, and above it its tasks: Terminal,
+Start (kept running until Stop; a paused one resumed), Pause (its running services frozen by systemd; WSL itself cannot
+pause a distribution), Stop… and Uninstall…. Needs liminal-libs>=1.37.0.
+
 ## 0.5.0 (2026-11-08)
 
 Every Gentoo install listed, and a selector for them (the user: "for the WSL plugins, they need to list all the
