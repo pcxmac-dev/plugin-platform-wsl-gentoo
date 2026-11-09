@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0 (2026-11-09)
+
+Update packages among an install's tasks, liminal-libs 1.39.0's (the user: "move the update packages on to the TASK"):
+the Gentoo install chosen brought up to date by emerge, its output in the terminal panel. Needs
+liminal-libs>=1.39.0.
+
 ## 0.7.0 (2026-11-09)
 
 Rename… among an install's tasks, liminal-libs 1.38.0's (the user: "lets allow renaming the o/s on all three plugins"):
