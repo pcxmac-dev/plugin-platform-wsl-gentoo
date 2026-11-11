@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.9.0 (2026-11-11)
+
+Its API on its page, plugin API 2.2 (the user: "each plugin should reflect the the API its attached to, and present
+links that provide documentation, the plugin interface should more or less contain what it already has, BUT, it should
+also expose more of what the API is about"). Five cards (`apis.py`), each with the makers' pages, every part of the API
+said covered or not, and every call the plugin makes beside the API's other notable ones:
+- WSL (wsl.exe): Microsoft's basic commands, install, wsl.conf and .wslconfig, systemd and import pages, its releases
+  and source; the wsl commands the setup and the tasks send (the import, never Microsoft's list), and WSL's own record
+  (Lxss) read and renamed.
+- Gentoo's stage3 releases: the downloads page, the Handbook's stage file, Gentoo in WSL, the autobuilds and the
+  newest systemd stage3's list, the release signatures; the list, the .sha256 and the tarball read, and Gentoo's WSL
+  image (stage4) beside them, unused.
+- Portage: the Portage and emerge pages, emerge(1), the Handbook's Portage chapter, Upgrading Gentoo, emerge-webrsync.
+- Docker, as Gentoo packages it: Gentoo's Docker page and packages, Docker's post-installation steps and references.
+- systemd, the install's init: the services scan, Pause, and the plugin's own systemd step (the machine ID,
+  systemd-resolved and systemd-networkd masked) and dns step (getent, systemctl is-system-running).
+
+`api_facts()` says what the plugin kept while it ran, asking nothing: Gentoo's newest stage3 as last read, Docker
+inside as last seen, the init of the last services scan. Tests: the cards name every wsl command the plugin sends over
+the whole setup and every task (a stand-in PC and a stand-in distfiles.gentoo.org), the commands its scripts run
+inside and the files it reads of Gentoo's; a link check runs with LIMINAL_VENDOR_PAGES=1. Needs liminal-libs>=1.49.0.
+
 ## 0.8.0 (2026-11-09)
 
 Update packages among an install's tasks, liminal-libs 1.39.0's (the user: "move the update packages on to the TASK"):

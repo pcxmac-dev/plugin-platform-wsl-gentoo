@@ -11,7 +11,7 @@ well, same scope/function".
 
 ## What it does
 
-A machine plugin of the platform (`liminal_libs.machines.MachinePlugin`, plugin API 2.1), the library's
+A machine plugin of the platform (`liminal_libs.machines.MachinePlugin`, plugin API 2.2), the library's
 `WslDistribution` with this distribution's name and family. Its hooks:
 
 - `present()`: whether the distribution is installed in WSL.
@@ -66,3 +66,37 @@ DNS servers, SSH, VPNs, the firewall, Liminal's own apps) are listed with what e
 known here is listed with its own description; the system's own (logging, time, devices, D-Bus, logins, package
 daemons, the WSL bridge) are counted and named in a note, with any that failed. The platform's page shows the table;
 the scan runs only while the distribution runs and is kept 30 s: a status never starts a stopped distribution.
+
+## Its API
+
+The user's words (2026-11-11): "each plugin should reflect the the API its attached to, and present links that provide
+documentation, the plugin interface should more or less contain what it already has, BUT, it should also expose more of
+what the API is about". Since 0.9.0 (plugin API 2.2) the plugin declares what it attaches to (`apis.py`), and the
+platform's page draws each card: what the API is, its links, every part of it (those the plugin uses first, the rest
+under "more of the API") and every call it makes, with the API's other notable calls beside them.
+
+- **WSL (wsl.exe)**, Microsoft's: [Basic commands](https://learn.microsoft.com/en-us/windows/wsl/basic-commands),
+  [Import any Linux distribution](https://learn.microsoft.com/en-us/windows/wsl/use-custom-distro),
+  [wsl.conf and .wslconfig](https://learn.microsoft.com/en-us/windows/wsl/wsl-config),
+  [systemd in WSL](https://learn.microsoft.com/en-us/windows/wsl/systemd),
+  [releases](https://github.com/microsoft/WSL/releases). Gentoo is not on Microsoft's list: Liminal-Gentoo is imported
+  (`wsl --import ... --version 2`), and WSL's own record of each install (its Lxss registry key, which Microsoft
+  documents no page for) is read to list them, and written only by Rename.
+- **Gentoo's stage3 releases**: [downloads](https://www.gentoo.org/downloads/),
+  [the Handbook's stage file](https://wiki.gentoo.org/wiki/Handbook:AMD64/Installation/Stage),
+  [Gentoo in WSL](https://wiki.gentoo.org/wiki/Gentoo_in_WSL),
+  [the amd64 autobuilds](https://distfiles.gentoo.org/releases/amd64/autobuilds/). Gentoo also publishes a WSL image
+  (stage4-amd64-wsl-systemd, for `wsl --install --from-file` on WSL 2.4.10 and later), which the plugin does not use.
+- **Portage**: [Portage](https://wiki.gentoo.org/wiki/Portage), [emerge](https://wiki.gentoo.org/wiki/Emerge),
+  [Upgrading Gentoo](https://wiki.gentoo.org/wiki/Upgrading_Gentoo).
+- **Docker**, as Gentoo packages it: [Docker on Gentoo](https://wiki.gentoo.org/wiki/Docker),
+  [app-containers/docker](https://packages.gentoo.org/packages/app-containers/docker); Docker publishes no Gentoo page of
+  its own.
+- **systemd**, the install's init: [systemctl(1)](https://www.freedesktop.org/software/systemd/man/latest/systemctl.html),
+  [machine-id(5)](https://www.freedesktop.org/software/systemd/man/latest/machine-id.html): the services scan, Pause
+  (systemd's freezer), and the plugin's own systemd and dns steps.
+
+`api_facts()` says what the plugin kept of them while it ran, asking nothing: Gentoo's newest stage3 as last read,
+Docker inside as last seen, the init the last services scan found. Every address on the cards was read on 2026-11-11;
+the test `test_the_cards_pages_answer` asks each of them again when `LIMINAL_VENDOR_PAGES=1` is set (it is skipped
+otherwise).

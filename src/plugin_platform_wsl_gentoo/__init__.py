@@ -8,6 +8,11 @@ WslDistribution (liminal_libs.machines.wsl); this module says which distribution
 around the library's conf step: `systemd` (Liminal-Gentoo made to boot under systemd as WSL needs) and `dns` (a lookup
 checked before anything is downloaded inside it).
 
+What it attaches to (0.9.0, plugin API 2.2; the user, 2026-11-11: "each plugin should reflect the the API its attached
+to, and present links that provide documentation"): wsl.exe, Gentoo's stage3 releases, Portage, Docker as Gentoo
+packages it, and the install's init (systemd), each with the makers' pages, its parts and its calls (apis.py), drawn on
+the plugin's page; `api_facts` says what the plugin kept of them while it ran.
+
     python -m plugin_platform_wsl_gentoo status | setup [STEP ...] | run -- COMMAND | instances
 """
 from __future__ import annotations
@@ -21,7 +26,9 @@ from time import monotonic
 from liminal_libs.machines.plugin import LIMINAL_PREFIX, liminal_scoped
 from liminal_libs.machines.wsl import WslDistribution, WslError
 
-__version__ = "0.8.0"
+from .apis import APIS, facts
+
+__version__ = "0.9.0"
 
 # The setup's steps: the library's, with two of Gentoo's own around its conf step (the restart into systemd). Why (the
 # user, 2026-11-08: "gentoo WSL error - wget: unable to resolve host address 'distfiles.gentoo.org'"): the stage3 ships
@@ -227,7 +234,8 @@ class WslGentooPlugin(WslDistribution):
     ICON = "gentoo"  # Gentoo's g (liminal-libs 1.33.0's icons.js)
     title = "WSL Gentoo"
     about = "Gentoo in WSL 2 on this Windows PC, with Docker inside: the Linux the platform's containers run in"
-    api = "2.1"
+    api = "2.2"
+    apis = APIS  # what it attaches to: wsl.exe, the stage3 releases, Portage, Docker, systemd (apis.py)
     order = 702
     distribution = "Liminal-Gentoo"  # Liminal's own, imported from Gentoo's stage3 (never a Gentoo of the user's)
     family = "emerge"
@@ -245,6 +253,11 @@ class WslGentooPlugin(WslDistribution):
         super().__init__(wsl=wsl, data=data, fetch=fetch)
         self._read = read  # (url) -> text: Gentoo's list of the latest stage3 and its checksums, urllib unless given
         self._stage3: tuple[float, tuple[str, int]] | None = None  # (when read, (url, size)): kept STAGE3_S
+
+    def api_facts(self) -> dict:
+        """What it kept of its APIs while it ran, asking nothing: Gentoo's newest stage3 as last read, Docker inside as
+        last seen, the init the last services scan found."""
+        return facts(self)
 
     def _text(self, url: str, what: str) -> str:
         """`url` read; WslError in words when it cannot be (the setup reports a WslError as its step failing, where
