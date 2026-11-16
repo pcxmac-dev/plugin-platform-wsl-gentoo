@@ -22,3 +22,9 @@ def test_its_icon_is_its_makers_mark_drawn_by_the_library():
 
     drawn = set(re.findall(r"^\s*([a-z]+):\s*'", (STATIC / "icons.js").read_text(encoding="utf-8"), re.M))
     assert {p.ICON for p in assert_module_conforms(module)} == {"gentoo"} and "gentoo" in drawn
+
+
+def test_it_is_drawn_under_the_platforms_os_plugins():
+    """Its section of the platform's list (liminal-platform 0.26.0; the user, 2026-11-15: "then OS plugins"): OS plugins,
+    beside the machine's own, the virtualization and the cloud plugins."""
+    assert {p.SECTION for p in assert_module_conforms(module)} == {"os"}

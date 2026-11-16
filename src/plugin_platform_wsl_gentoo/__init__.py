@@ -28,7 +28,7 @@ from liminal_libs.machines.wsl import WslDistribution, WslError
 
 from .apis import APIS, facts
 
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 
 # The setup's steps: the library's, with two of Gentoo's own around its conf step (the restart into systemd). Why (the
 # user, 2026-11-08: "gentoo WSL error - wget: unable to resolve host address 'distfiles.gentoo.org'"): the stage3 ships
@@ -232,6 +232,7 @@ def _guard(name: str) -> str:
 class WslGentooPlugin(WslDistribution):
     name = "wsl-gentoo"
     ICON = "gentoo"  # Gentoo's g (liminal-libs 1.33.0's icons.js)
+    SECTION = "os"  # drawn under the platform's OS plugins (liminal-platform 0.26.0)
     title = "WSL Gentoo"
     about = "Gentoo in WSL 2 on this Windows PC, with Docker inside: the Linux the platform's containers run in"
     api = "2.2"
