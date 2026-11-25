@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.10.0 (2026-11-25)
+
+Holds and WSL's one network, on liminal-libs 1.96.0's WslDistribution (service-containers-networking-2026-11-23.md
+§5.4, §8.1 and §8.5; the design's §7 rows 21 and 22). Floor: liminal-libs 1.96.0.
+- `hold` and `let_go` (a container plugin's alone): Liminal-Gentoo held up by one windowless session of the plugin's own
+  while any service runs in it, ended with the last holder; a hold never starts it when it is stopped (the user's
+  rule: an engine that is off is never started), and is refused, naming this page.
+- `wsl_network` (anyone's read): the mode .wslconfig sets, the distributions running (wsl --list, which starts
+  nothing) and, only while Liminal-Gentoo runs, its eth0 address, the engines' bridges and whether its Docker answers:
+  the Windows firewall's next hop. Nothing is run in a stopped distribution, or in yours.
+- Asked a second time: Start beside another WSL distribution's running engine (N10: one engine in WSL's one
+  network, `accept_second_engine`), and the engine step refuses there; Stop while a service holds it
+  (`accept_held`, naming the holders); Uninstall of Liminal-Gentoo while services, their networks or holds go with it
+  (`accept_risk`, naming them), and of one of your own with them named too.
+- Every change asked from the page alone (Uninstall first, then the packages' update, the terminal, the
+  installs' tasks): before, any plugin could ask uninstall with accept_risk set.
+- Tests: tests/test_holds.py.
+
 ## 0.9.1 (2026-11-15)
 
 Drawn under the platform's OS plugins section, in the list on the left (the user: "then OS plugins" (the WSL distributions, the admin and the firewall plugins, as chosen)): `SECTION = "os"`, liminal-libs 1.51.0's machine-plugin attribute. liminal-platform 0.26.0 draws it; an older platform keeps the plugin under Machine plugins. Nothing else changes.

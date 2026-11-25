@@ -13,6 +13,15 @@ to, and present links that provide documentation"): wsl.exe, Gentoo's stage3 rel
 packages it, and the install's init (systemd), each with the makers' pages, its parts and its calls (apis.py), drawn on
 the plugin's page; `api_facts` says what the plugin kept of them while it ran.
 
+Holds and WSL's one network (0.10.0, liminal-libs 1.96.0's WslDistribution; service-containers-networking
+§5.4 and §8.5): a container plugin holds Liminal-Gentoo up while a service runs in it (hold, let_go: a container
+plugin's alone; one session for all its holders), and a hold never starts it when it is stopped. Any plugin
+reads WSL's one network (wsl_network: the mode .wslconfig sets, the distributions running, and, only while Liminal-Gentoo
+runs, its eth0 address, the engines' bridges and whether its Docker answers): the Windows firewall's next hop.
+Start beside another distribution's running engine, Stop while a service holds it, and Uninstall while
+services and their networks go with it are each asked a second time; every change is asked from the page
+alone.
+
     python -m plugin_platform_wsl_gentoo status | setup [STEP ...] | run -- COMMAND | instances
 """
 from __future__ import annotations
@@ -28,7 +37,7 @@ from liminal_libs.machines.wsl import WslDistribution, WslError
 
 from .apis import APIS, facts
 
-__version__ = "0.9.1"
+__version__ = "0.10.0"
 
 # The setup's steps: the library's, with two of Gentoo's own around its conf step (the restart into systemd). Why (the
 # user, 2026-11-08: "gentoo WSL error - wget: unable to resolve host address 'distfiles.gentoo.org'"): the stage3 ships
